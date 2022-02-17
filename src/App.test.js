@@ -1,11 +1,19 @@
 import App, { calcularNovoSaldo } from "./app";
 import React from "react";
-import { reader, render, screen } from "@testing-library/react";
+import {
+  fireEvent,
+  getByLabelText,
+  getByTestId,
+  reader,
+  render,
+  screen,
+} from "@testing-library/react";
 
 describe("Componente principal", () => {
   describe("Quando abro o app do banco", () => {
-    it("O nome é exibido", () => {
+    it("O nome é exibido", ()  => {
       render(<App />);
+
       expect(screen.getByText("ByteBank")).toBeInTheDocument();
     });
 
@@ -29,7 +37,7 @@ describe("Componente principal", () => {
 
       const novoSaldo = calcularNovoSaldo(valores, 100);
 
-      expect(novoSaldo).toBe(50); 
+      expect(novoSaldo).toBe(50);
     });
 
     it("de deposito, o valor vai aumentar", () => {
@@ -41,6 +49,22 @@ describe("Componente principal", () => {
       const novoSaldo = calcularNovoSaldo(valores, 100);
 
       expect(novoSaldo).toBe(150);
+    });
+
+    it("de saque, a transação deve ser realizada", () => {
+      render(<App />);
+
+      const saldo = screen.getByText("R$ 1000");
+      const transacao = screen.getByLabelText("Saque");
+      const valor = screen.getByTestId("valor");
+      const botãoTransacao = screen.getByText("Realizar operação");
+
+      expect(saldo.textContent).toBe("R$ 1000");
+
+      fireEvent.click(transacao, { target: { value: "saque" } });
+      fireEvent.change(valor, { target: { value: 990 } });
+      fireEvent.click(botãoTransacao);
+      expect(saldo.textContent).toBe("R$ 10");
     });
   });
 });
